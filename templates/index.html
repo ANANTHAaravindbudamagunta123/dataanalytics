@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Light Analytics - Upload</title>
+<link rel="stylesheet" href="/static/css/index.css">
+</head>
+<body>
+<div class="container">
+<h1>Lightweight Analytics</h1>
+<p>Upload a CSV or Excel file to get started</p>
+
+
+{% if message %}
+<div class="error">{{ message }}</div>
+{% endif %}
+
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+<input type="file" name="file" accept=".csv, .xls, .xlsx" required>
+<button type="submit">Upload</button>
+</form>
+
+
+<hr>
+<h3>Sample Data</h3>
+<p>Use the bundled sample_sales.csv to test.
+</div>
+</body>
+</html>

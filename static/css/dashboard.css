@@ -1,0 +1,150 @@
+/* dashboard.css */
+
+/* General Body & Container */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 25px 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Headings */
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #2c3e50;
+    font-size: 2rem;
+}
+
+/* Numeric Summary Table */
+.summary {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.summary h3 {
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    color: #34495e;
+}
+
+.summary table {
+    border-collapse: collapse;
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+}
+
+.summary th, .summary td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+.summary th {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: #fff;
+    font-weight: 600;
+}
+
+.summary tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Chart Controls */
+.controls {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.controls form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.controls label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.95em;
+    flex: 1 1 200px;
+}
+
+.controls select, 
+.controls input {
+    margin-top: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.controls select:focus,
+.controls input:focus {
+    outline: none;
+    border-color: #2575fc;
+    box-shadow: 0 0 5px rgba(37, 117, 252, 0.3);
+}
+
+.controls button {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1 1 150px;
+}
+
+.controls button:hover {
+    background: linear-gradient(to right, #2575fc, #6a11cb);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37,117,252,0.3);
+}
+
+/* Chart Area */
+.chart-area {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    position: relative;
+    height: 500px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .controls form {
+        flex-direction: column;
+    }
+
+    .controls label, .controls button {
+        flex: 1 1 100%;
+    }
+}

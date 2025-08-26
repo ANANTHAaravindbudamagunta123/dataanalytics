@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard - {{ filename }}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+  .container { max-width: 1200px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .summary, .controls, .chart-area { margin-bottom: 30px; }
+  table { border-collapse: collapse; width: 100%; max-width: 100%; overflow-x: auto; display: block; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 14px; }
+  th { background-color: #f2f2f2; }
+  label { margin-right: 10px; display: inline-block; margin-bottom: 5px; }
+  select, input, button { margin-right: 15px; padding: 5px 10px; }
+  .chart-area { position: relative; height: 500px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Dashboard — {{ filename }}</h1>
+
+  <!-- Numeric Summary Table -->
+  <div class="summary">
+    <h3>Numeric Summary (first 5 shown)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Column</th><th>Count</th><th>Mean</th><th>Std</th><th>Min</th><th>25%</th><th>50%</th><th>75%</th><th>Max</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col, stats in summary['numeric'].items() %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ stats.count }}</td>
+          <td>{{ stats.mean }}</td>
+          <td>{{ stats.std }}</td>
+          <td>{{ stats.min }}</td>
+          <td>{{ stats['25%'] }}</td>
+          <td>{{ stats['50%'] }}</td>
+          <td>{{ stats['75%'] }}</td>
+          <td>{{ stats.max }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Chart Controls -->
+  <div class="controls">
+    <form id="chartForm">
+      <input type="hidden" name="filename" value="{{ filename }}">
+
+      <label>Chart type
+        <select name="chart_type" id="chart_type">
+          <option value="bar">Bar</option>
+          <option value="line">Line</option>
+          <option value="pie">Pie</option>
+          <option value="doughnut">Doughnut</option>
+          <option value="radar">Radar</option>
+        </select>
+      </label>
+
+      <label>X column
+        <select name="x_col" id="x_col">
+          <option value="">--select--</option>
+          {% for c in columns['all'] %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>Y column
+        <select name="y_col" id="y_col">
+          <option value="">--select--</option>
+          {% for c in columns['numeric'] %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>Aggregation
+        <select name="agg" id="agg">
+          <option value="sum">sum</option>
+          <option value="mean">mean</option>
+          <option value="count">count</option>
+          <option value="max">max</option>
+          <option value="min">min</option>
+        </select>
+      </label>
+
+      <label>Custom Colors (comma-separated)
+        <input type="text" name="colors" id="colors" placeholder="red, blue, green, ...">
+      </label>
+
+      <button type="button" id="generateBtn">Generate Chart</button>
+    </form>
+  </div>
+
+  <!-- Chart Display Area -->
+  <div class="chart-area">
+    <canvas id="chartCanvas"></canvas>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const btn = document.getElementById("generateBtn");
+  const ctx = document.getElementById("chartCanvas").getContext("2d");
+  let currentChart = null;
+
+  btn.addEventListener("click", async function() {
+    const formData = new FormData(document.getElementById("chartForm"));
+    const colorsInput = formData.get("colors").split(",").map(c => c.trim()).filter(c => c);
+    const chartType = formData.get("chart_type");
+
+    const response = await fetch("/generate_chart", { method: "POST", body: formData });
+    const data = await response.json();
+
+    if (!data.labels || !data.values) {
+      alert("Invalid chart data. Make sure X and Y columns are selected correctly.");
+      return;
+    }
+
+    if (currentChart) currentChart.destroy();
+
+    const generateColors = (length) => {
+      if (colorsInput.length >= length) return colorsInput.slice(0, length);
+      const extra = Array.from({length: length - colorsInput.length}, (_, i) => `hsl(${i*360/length}, 70%, 50%)`);
+      return [...colorsInput, ...extra];
+    }
+
+    let dataset = {
+      label: formData.get("y_col"),
+      data: data.values,
+      backgroundColor: (chartType === 'pie' || chartType === 'doughnut' || chartType === 'radar') ? generateColors(data.values.length) : generateColors(data.values.length),
+      borderColor: (chartType === 'pie' || chartType === 'doughnut') ? '#fff' : generateColors(data.values.length),
+      fill: chartType === 'radar',  // radar requires fill true
+      borderWidth: 1
+    };
+
+    // For radar chart, add transparency to background
+    if (chartType === 'radar') {
+      dataset.backgroundColor = dataset.backgroundColor.map(c => c + '33');
+      dataset.borderColor = dataset.backgroundColor.map(c => c.replace('33',''));
+    }
+
+    currentChart = new Chart(ctx, {
+      type: chartType,
+      data: { labels: data.labels, datasets: [dataset] },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" }, title: { display: true, text: "Generated Chart" } }
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
